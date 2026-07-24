@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Oromia Fleet Driver",
+    "slug": "oromia-fleet-driver",
+    "version": "0.1.0",
+    "platforms": ["android"],
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "et.gov.oromia.finance.fleet.driver",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow the driver app to capture location only when you deliberately submit approved evidence."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow the driver app to capture approved operational evidence.",
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-sqlite"
+    ],
+    "extra": {
+      "supportedPlatform": "android"
+    }
+  }
+}

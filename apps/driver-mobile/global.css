@@ -1,0 +1,51 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@theme {
+  --color-canvas: #f6f8f7;
+  --color-canvas-dark: #0d1713;
+  --color-surface: #ffffff;
+  --color-surface-dark: #17231e;
+  --color-content: #12372a;
+  --color-content-dark: #eef7f2;
+  --color-content-muted: #455c53;
+  --color-content-muted-dark: #b8c9c0;
+  --color-brand: #174c39;
+  --color-brand-strong: #12372a;
+  --color-brand-soft: #d7f4e4;
+  --color-border: #9eb5aa;
+  --color-border-dark: #52685d;
+  --color-info: #174f7a;
+  --color-info-soft: #dceefe;
+  --color-warning: #713f00;
+  --color-warning-soft: #fff0ce;
+  --color-danger: #8b1e2d;
+  --color-danger-soft: #fde2e5;
+  --color-success: #145c35;
+  --color-success-soft: #d7f4e4;
+  --color-disabled: #d6ded9;
+  --color-disabled-content: #66766e;
+
+  --spacing-touch: 3rem;
+  --spacing-screen-compact: 1rem;
+  --spacing-screen: 1.5rem;
+
+  --radius-control: 0.75rem;
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.25rem;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.5625rem;
+  --text-heading: 1.375rem;
+  --text-heading--line-height: 1.875rem;
+  --text-title: 1.75rem;
+  --text-title--line-height: 2.25rem;
+
+  --breakpoint-sm: 24rem;
+  --breakpoint-lg: 48rem;
+}

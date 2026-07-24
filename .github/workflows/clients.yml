@@ -1,0 +1,33 @@
+name: Client quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  clients:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - run: npm run contracts:generate
+      - run: git diff --exit-code -- packages/api-contracts/src/generated.ts
+      - run: npm run openapi:validate
+      - run: npm run translations:check
+      - run: npm run web:lint
+      - run: npm run web:typecheck
+      - run: npm run web:test
+      - run: npm run web:build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
+      - run: npm run mobile:lint
+      - run: npm run mobile:typecheck
+      - run: npm run mobile:test
+      - run: npm run config:validate --workspace=@oromia/driver-mobile
+        env:
+          EXPO_PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
+      - run: npm audit --audit-level=high
+      - run: npm run docs:check

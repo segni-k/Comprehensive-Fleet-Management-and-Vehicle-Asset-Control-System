@@ -1,0 +1,58 @@
+name: API quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: oromia_fleet_test
+          MYSQL_ROOT_PASSWORD: test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -ptest"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: dom, curl, mbstring, pdo_mysql, xml
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: apps/api/vendor
+          key: composer-${{ hashFiles('apps/api/composer.lock') }}
+      - run: composer install --no-interaction --prefer-dist
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --no-progress
+      - run: php artisan test
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: oromia_fleet_test
+          DB_USERNAME: root
+          DB_PASSWORD: test
+      - run: php artisan migrate:fresh --force && php artisan migrate:rollback --step=1 --force
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: oromia_fleet_test
+          DB_USERNAME: root
+          DB_PASSWORD: test
+      - run: composer audit --locked --no-interaction
+      - name: Validate OpenAPI with Vacuum
+        working-directory: .
+        run: infrastructure/scripts/validate-openapi-vacuum.sh

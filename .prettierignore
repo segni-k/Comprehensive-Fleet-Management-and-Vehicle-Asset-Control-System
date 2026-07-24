@@ -1,0 +1,7 @@
+**/vendor
+**/node_modules
+**/.next
+**/.expo
+docs/**/*.docx
+docs/**/*.xlsx
+packages/api-contracts/src/generated.ts

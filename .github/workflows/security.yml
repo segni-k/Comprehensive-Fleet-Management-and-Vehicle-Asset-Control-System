@@ -1,0 +1,22 @@
+name: Repository security
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  repository:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reject forbidden sensitive files
+        run: |
+          if find . -type f \\( -name '*.pem' -o -name '*.key' -o -name '*.p12' -o -name '*.jks' -o -name '*.keystore' \\) -print -quit | grep -q .; then
+            echo "Forbidden key material found"; exit 1
+          fi
