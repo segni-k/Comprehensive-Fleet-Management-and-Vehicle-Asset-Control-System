@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Identity\AuthenticationController;
+use App\Http\Controllers\Identity\GovernanceController;
 use App\Http\Controllers\Organization\HierarchyController;
 use App\Http\Controllers\Organization\HierarchyMoveController;
 use App\Http\Controllers\Organization\OrganizationConfigurationController;
@@ -30,6 +31,26 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/me', [AuthenticationController::class, 'me'])->name('api.v1.me');
         Route::get('/me/sessions', [AuthenticationController::class, 'sessions'])->name('api.v1.me.sessions');
         Route::delete('/me/sessions/{session}', [AuthenticationController::class, 'revokeSession'])->name('api.v1.me.sessions.revoke');
+
+        Route::get('/users', [GovernanceController::class, 'users'])->middleware('identity.permission:identity.user.view');
+        Route::post('/users', [GovernanceController::class, 'createUser'])->middleware(['identity.permission:identity.user.manage', 'idempotent']);
+        Route::post('/users/{user}/status', [GovernanceController::class, 'changeUserStatus'])->middleware(['identity.permission:identity.user.manage', 'idempotent']);
+        Route::get('/permissions', [GovernanceController::class, 'permissions'])->middleware('identity.permission:identity.role.view');
+        Route::get('/roles', [GovernanceController::class, 'roles'])->middleware('identity.permission:identity.role.view');
+        Route::post('/roles', [GovernanceController::class, 'createRole'])->middleware(['identity.permission:identity.role.manage', 'idempotent']);
+        Route::get('/role-assignments', [GovernanceController::class, 'roleAssignments'])->middleware('identity.permission:identity.role_assignment.view');
+        Route::post('/role-assignments', [GovernanceController::class, 'requestAssignment'])->middleware(['identity.permission:identity.role_assignment.request', 'idempotent']);
+        Route::post('/role-assignments/{assignment}/approve', [GovernanceController::class, 'approveAssignment'])->middleware(['identity.permission:identity.role_assignment.approve', 'idempotent']);
+        Route::post('/role-assignments/{assignment}/revoke', [GovernanceController::class, 'revokeAssignment'])->middleware(['identity.permission:identity.role_assignment.approve', 'idempotent']);
+        Route::get('/delegations', [GovernanceController::class, 'delegations'])->middleware('identity.permission:identity.delegation.view');
+        Route::post('/delegations', [GovernanceController::class, 'requestDelegation'])->middleware(['identity.permission:identity.delegation.request', 'idempotent']);
+        Route::post('/delegations/{delegation}/approve', [GovernanceController::class, 'approveDelegation'])->middleware(['identity.permission:identity.delegation.approve', 'idempotent']);
+        Route::post('/delegations/{delegation}/revoke', [GovernanceController::class, 'revokeDelegation'])->middleware(['identity.permission:identity.delegation.request', 'idempotent']);
+        Route::get('/access-reviews', [GovernanceController::class, 'accessReviews'])->middleware('identity.permission:identity.access_review.manage');
+        Route::get('/break-glass-access', [GovernanceController::class, 'breakGlassEvents'])->middleware('identity.permission:identity.break_glass.review');
+        Route::post('/break-glass-access', [GovernanceController::class, 'startBreakGlass'])->middleware(['identity.permission:identity.break_glass.request', 'idempotent']);
+        Route::post('/break-glass-access/{access}/review', [GovernanceController::class, 'reviewBreakGlass'])->middleware(['identity.permission:identity.break_glass.review', 'idempotent']);
+        Route::get('/identity-audit-events', [GovernanceController::class, 'audit'])->middleware('identity.permission:identity.audit.view');
     });
 
     Route::middleware('throttle:api')->group(function (): void {
