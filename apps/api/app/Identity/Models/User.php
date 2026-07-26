@@ -12,9 +12,11 @@ use Illuminate\Notifications\Notifiable;
 
 final class User extends IdentityModel implements AuthenticatableContract, HasLocalePreference
 {
-    /** @use HasFactory<UserFactory> */
     use Authenticatable;
+
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use Notifiable;
 
     protected $fillable = [
