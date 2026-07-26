@@ -20,6 +20,10 @@ export function AppShell({
         </Link>
         <nav aria-label="Platform" className="shell-nav">
           <Link href="/">{translate(locale, "nav.home")}</Link>
+          <Link href="/organizations">
+            {translate(locale, "nav.organizations")}
+          </Link>
+          <a href="/identity">Identity &amp; access</a>
           <Link href="/profile">{translate(locale, "nav.profile")}</Link>
           <Link href="/sign-in">{translate(locale, "auth.signIn")}</Link>
         </nav>
