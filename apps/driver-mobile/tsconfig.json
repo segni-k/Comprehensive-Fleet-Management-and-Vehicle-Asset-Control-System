@@ -14,7 +14,6 @@
     "types": ["jest", "node", "react", "react-native"]
   },
   "include": [
-    "App.tsx",
     "src/**/*.ts",
     "src/**/*.tsx",
     "jest.setup.ts",
