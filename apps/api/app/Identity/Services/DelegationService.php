@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 final class DelegationService
 {
-    public function __construct(private readonly IdentityAuditService $audit)
-    {
-    }
+    public function __construct(private readonly IdentityAuditService $audit) {}
 
     /**
      * @param  array<int, string>  $permissionCodes

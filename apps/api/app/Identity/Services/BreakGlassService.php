@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 final class BreakGlassService
 {
-    public function __construct(private readonly IdentityAuditService $audit)
-    {
-    }
+    public function __construct(private readonly IdentityAuditService $audit) {}
 
     /** @param array<int, string> $permissionCodes */
     public function start(

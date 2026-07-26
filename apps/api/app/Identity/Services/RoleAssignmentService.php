@@ -13,8 +13,7 @@ final class RoleAssignmentService
     public function __construct(
         private readonly AuthorizationService $authorization,
         private readonly IdentityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     /** @param array<int, array<string, string|null>> $scopeGrants */
     public function request(
