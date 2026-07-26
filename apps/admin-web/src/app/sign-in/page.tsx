@@ -1,11 +1,5 @@
-import { StatePanel } from "@/components/StatePanel";
-import { getServerLocale } from "@/localization/server-locale";
+import { IdentitySignIn } from "@/components/identity/IdentitySignIn";
 
 export default async function SignInPage() {
-  return (
-    <StatePanel
-      locale={await getServerLocale()}
-      title="auth.integrationPending"
-    />
-  );
+  return <IdentitySignIn />;
 }
