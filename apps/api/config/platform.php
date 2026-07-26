@@ -14,4 +14,7 @@ return [
         'redis' => (bool) env('HEALTH_CHECK_REDIS', false),
         'queue' => (bool) env('HEALTH_CHECK_QUEUE', false),
     ],
+    'organization' => [
+        'production_move_application_enabled' => (bool) env('ORGANIZATION_PRODUCTION_MOVE_APPLICATION_ENABLED', false),
+    ],
 ];

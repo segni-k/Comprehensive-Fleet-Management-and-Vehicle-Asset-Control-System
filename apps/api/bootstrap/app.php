@@ -3,6 +3,10 @@
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\ConflictException;
 use App\Http\Middleware\AssignCorrelationId;
+use App\Http\Middleware\AuthenticateIdentity;
+use App\Http\Middleware\AuthorizeIdentityPermission;
+use App\Http\Middleware\EnforceIdempotency;
+use App\Http\Middleware\EnforceOrganizationPermission;
 use App\Http\Middleware\EnforceRequestSize;
 use App\Http\Middleware\LogRequest;
 use App\Http\Middleware\SecurityHeaders;
@@ -24,6 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'identity.auth' => AuthenticateIdentity::class,
+            'identity.permission' => AuthorizeIdentityPermission::class,
+            'organization.permission' => EnforceOrganizationPermission::class,
+            'idempotent' => EnforceIdempotency::class,
+        ]);
         $middleware->append([
             AssignCorrelationId::class,
             EnforceRequestSize::class,
