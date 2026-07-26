@@ -2,6 +2,7 @@
 
 namespace App\Identity\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -11,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 
 final class User extends IdentityModel implements AuthenticatableContract, HasLocalePreference
 {
+    /** @use HasFactory<UserFactory> */
     use Authenticatable;
     use HasFactory;
     use Notifiable;
