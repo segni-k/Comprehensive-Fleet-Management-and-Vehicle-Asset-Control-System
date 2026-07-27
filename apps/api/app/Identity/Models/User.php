@@ -97,4 +97,9 @@ final class User extends IdentityModel implements AuthenticatableContract, HasLo
     {
         return $this->preferred_locale;
     }
+
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
 }

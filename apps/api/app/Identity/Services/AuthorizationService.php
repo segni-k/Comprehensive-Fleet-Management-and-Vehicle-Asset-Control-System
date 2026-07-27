@@ -20,9 +20,30 @@ final class AuthorizationService
         ?string $resourceId = null,
         ?UserSession $session = null,
     ): bool {
+        return $this->resolveAuthority(
+            $user,
+            $permissionCode,
+            $organizationId,
+            $resourceType,
+            $resourceId,
+            $session,
+        ) !== null;
+    }
+
+    /**
+     * @return array{role_assignment_id: string, delegation_id: string|null}|null
+     */
+    public function resolveAuthority(
+        User $user,
+        string $permissionCode,
+        ?string $organizationId = null,
+        ?string $resourceType = null,
+        ?string $resourceId = null,
+        ?UserSession $session = null,
+    ): ?array {
         $permission = Permission::query()->where('code', $permissionCode)->where('status', 'active')->first();
         if ($permission === null || ($permission->requires_mfa && $session?->mfa_verified_at === null)) {
-            return false;
+            return null;
         }
 
         $now = now();
@@ -36,17 +57,18 @@ final class AuthorizationService
             ->filter(fn (UserRoleAssignment $assignment): bool => $assignment->role->status === 'active'
                 && $assignment->role->permissions->contains('id', $permission->id));
 
-        if ($assignments->contains(fn (UserRoleAssignment $assignment): bool => $this->assignmentCovers(
-            $assignment, $organizationId, $resourceType, $resourceId,
-        ))) {
-            return true;
+        $assignment = $assignments->first(fn (UserRoleAssignment $candidate): bool => $this->assignmentCovers(
+            $candidate, $organizationId, $resourceType, $resourceId,
+        ));
+        if ($assignment instanceof UserRoleAssignment) {
+            return ['role_assignment_id' => $assignment->id, 'delegation_id' => null];
         }
 
         if (! $permission->delegable) {
-            return false;
+            return null;
         }
 
-        return Delegation::query()
+        $delegation = Delegation::query()
             ->with(['permissions', 'scopeGrants', 'sourceAssignment.role.permissions', 'sourceAssignment.scopeGrants'])
             ->where('delegatee_user_id', $user->id)
             ->where('status', 'active')
@@ -60,6 +82,13 @@ final class AuthorizationService
                     && $this->delegationCovers($delegation, $organizationId, $resourceType, $resourceId)
                     && $this->assignmentCovers($delegation->sourceAssignment, $organizationId, $resourceType, $resourceId);
             });
+
+        return $delegation instanceof Delegation
+            ? [
+                'role_assignment_id' => $delegation->source_role_assignment_id,
+                'delegation_id' => $delegation->id,
+            ]
+            : null;
     }
 
     private function assignmentCovers(
