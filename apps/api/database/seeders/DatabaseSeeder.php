@@ -16,5 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(OrganizationTemplateSeeder::class);
         $this->call(IdentityPermissionSeeder::class);
+        $this->call(MilestoneFourReferenceSeeder::class);
+        $this->call(MilestoneFiveReferenceSeeder::class);
+        $this->call(MilestoneSixReferenceSeeder::class);
     }
 }

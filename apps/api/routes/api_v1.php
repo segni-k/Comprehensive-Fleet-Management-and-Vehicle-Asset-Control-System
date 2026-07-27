@@ -1,7 +1,17 @@
 <?php
 
+use App\Http\Controllers\Fleet\AssignmentController;
+use App\Http\Controllers\Fleet\DriverController;
+use App\Http\Controllers\Fleet\FleetController;
+use App\Http\Controllers\Fleet\VehicleController;
+use App\Http\Controllers\Geography\GeographyController;
 use App\Http\Controllers\Identity\AuthenticationController;
 use App\Http\Controllers\Identity\GovernanceController;
+use App\Http\Controllers\Operations\AuditController;
+use App\Http\Controllers\Operations\DocumentController;
+use App\Http\Controllers\Operations\NotificationController;
+use App\Http\Controllers\Operations\OutboxController;
+use App\Http\Controllers\Operations\WorkflowController;
 use App\Http\Controllers\Organization\HierarchyController;
 use App\Http\Controllers\Organization\HierarchyMoveController;
 use App\Http\Controllers\Organization\OrganizationConfigurationController;
@@ -51,6 +61,96 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/break-glass-access', [GovernanceController::class, 'startBreakGlass'])->middleware(['identity.permission:identity.break_glass.request', 'idempotent']);
         Route::post('/break-glass-access/{access}/review', [GovernanceController::class, 'reviewBreakGlass'])->middleware(['identity.permission:identity.break_glass.review', 'idempotent']);
         Route::get('/identity-audit-events', [GovernanceController::class, 'audit'])->middleware('identity.permission:identity.audit.view');
+
+        Route::get('/audit-events', [AuditController::class, 'index'])->middleware('identity.permission:audit.event.view');
+        Route::get('/audit-events-export', [AuditController::class, 'export'])->middleware('identity.permission:audit.event.export');
+        Route::get('/audit-events/{auditEvent}', [AuditController::class, 'show'])->middleware('identity.permission:audit.event.view');
+        Route::post('/audit-integrity/verify', [AuditController::class, 'verify'])->middleware(['identity.permission:audit.integrity.verify', 'idempotent']);
+
+        Route::get('/documents', [DocumentController::class, 'index'])->middleware('identity.permission:document.view');
+        Route::post('/documents', [DocumentController::class, 'store'])->middleware(['identity.permission:document.upload', 'idempotent']);
+        Route::get('/documents/{document}', [DocumentController::class, 'show'])->middleware('identity.permission:document.view');
+        Route::get('/documents/{document}/history', [DocumentController::class, 'history'])->middleware('identity.permission:document.view');
+        Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->middleware('identity.permission:document.download');
+        Route::post('/documents/{document}/replace', [DocumentController::class, 'replace'])->middleware(['identity.permission:document.replace', 'idempotent']);
+        Route::post('/documents/{document}/archive', [DocumentController::class, 'archive'])->middleware(['identity.permission:document.archive', 'idempotent']);
+
+        Route::get('/workflow-definitions', [WorkflowController::class, 'definitions'])->middleware('identity.permission:workflow.view');
+        Route::post('/workflow-definitions', [WorkflowController::class, 'createDefinition'])->middleware(['identity.permission:workflow.configure', 'idempotent']);
+        Route::post('/workflow-definitions/{definition}/publish', [WorkflowController::class, 'publishDefinition'])->middleware(['identity.permission:workflow.approve', 'idempotent']);
+        Route::get('/workflow-instances', [WorkflowController::class, 'instances'])->middleware('identity.permission:workflow.view');
+        Route::post('/workflow-instances', [WorkflowController::class, 'start'])->middleware(['identity.permission:workflow.view', 'idempotent']);
+        Route::get('/workflow-instances/{instance}', [WorkflowController::class, 'show'])->middleware('identity.permission:workflow.view');
+        Route::post('/workflow-instances/{instance}/transitions', [WorkflowController::class, 'transition'])->middleware(['identity.permission:workflow.view', 'idempotent']);
+        Route::post('/workflow-instances/{instance}/comments', [WorkflowController::class, 'comment'])->middleware(['identity.permission:workflow.view', 'idempotent']);
+        Route::post('/workflow-instances/{instance}/reassign', [WorkflowController::class, 'reassign'])->middleware(['identity.permission:workflow.approve', 'idempotent']);
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->middleware('identity.permission:notification.view');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->middleware(['identity.permission:notification.view', 'idempotent']);
+        Route::get('/notification-preferences', [NotificationController::class, 'preferences'])->middleware('identity.permission:notification.view');
+        Route::put('/notification-preferences', [NotificationController::class, 'updatePreference'])->middleware(['identity.permission:notification.view', 'idempotent']);
+        Route::get('/notification-templates', [NotificationController::class, 'templates'])->middleware('identity.permission:notification.template.manage');
+        Route::post('/notification-templates', [NotificationController::class, 'createTemplate'])->middleware(['identity.permission:notification.template.manage', 'idempotent']);
+        Route::post('/notification-templates/{template}/activate', [NotificationController::class, 'activateTemplate'])->middleware(['identity.permission:notification.template.manage', 'idempotent']);
+
+        Route::get('/outbox/messages', [OutboxController::class, 'index'])->middleware('identity.permission:outbox.view');
+        Route::get('/outbox/dead-letters', [OutboxController::class, 'deadLetters'])->middleware('identity.permission:outbox.view');
+        Route::post('/outbox/dead-letters/{deadLetter}/replay', [OutboxController::class, 'replay'])->middleware(['identity.permission:outbox.replay', 'idempotent']);
+        Route::post('/outbox/process', [OutboxController::class, 'process'])->middleware(['identity.permission:outbox.replay', 'idempotent']);
+
+        Route::get('/fleet/reference-data', [FleetController::class, 'referenceData'])->middleware('identity.permission:fleet.reference.view');
+        Route::post('/fleet/reference-data/{resource}', [FleetController::class, 'storeReference'])->middleware(['identity.permission:fleet.reference.manage', 'idempotent']);
+        Route::post('/fleet/vehicle-licence-compatibility', [FleetController::class, 'linkVehicleLicenceClass'])->middleware(['identity.permission:fleet.reference.manage', 'idempotent']);
+        Route::get('/fleet/dashboard', [FleetController::class, 'dashboard'])->middleware('identity.permission:fleet.dashboard.view');
+        Route::get('/vehicles', [VehicleController::class, 'index'])->middleware('identity.permission:vehicle.view');
+        Route::post('/vehicles', [VehicleController::class, 'store'])->middleware(['identity.permission:vehicle.create', 'idempotent']);
+        Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->middleware('identity.permission:vehicle.view');
+        Route::post('/vehicles/{vehicle}/status', [VehicleController::class, 'status'])->middleware(['identity.permission:vehicle.status.manage', 'idempotent']);
+        Route::post('/vehicles/{vehicle}/transfer', [VehicleController::class, 'transfer'])->middleware(['identity.permission:vehicle.transfer', 'idempotent']);
+        Route::post('/vehicles/{vehicle}/odometer-readings', [VehicleController::class, 'odometer'])->middleware(['identity.permission:vehicle.odometer.record', 'idempotent']);
+        Route::post('/vehicles/{vehicle}/plates', [VehicleController::class, 'plate'])->middleware(['identity.permission:vehicle.plate.manage', 'idempotent']);
+        Route::post('/vehicles/{vehicle}/fleet-assignment', [VehicleController::class, 'fleetUnit'])->middleware(['identity.permission:vehicle.fleet.assign', 'idempotent']);
+        Route::post('/vehicles/{vehicle}/compliance-records', [VehicleController::class, 'compliance'])->middleware(['identity.permission:vehicle.compliance.manage', 'idempotent']);
+        Route::get('/drivers', [DriverController::class, 'index'])->middleware('identity.permission:driver.view');
+        Route::post('/drivers', [DriverController::class, 'store'])->middleware(['identity.permission:driver.create', 'idempotent']);
+        Route::get('/drivers/{driver}', [DriverController::class, 'show'])->middleware('identity.permission:driver.view');
+        Route::post('/drivers/{driver}/status', [DriverController::class, 'status'])->middleware(['identity.permission:driver.status.manage', 'idempotent']);
+        Route::post('/drivers/{driver}/licences', [DriverController::class, 'licence'])->middleware(['identity.permission:driver.licence.manage', 'idempotent']);
+        Route::get('/vehicle-driver-assignments', [AssignmentController::class, 'index'])->middleware('identity.permission:assignment.view');
+        Route::post('/vehicle-driver-assignments', [AssignmentController::class, 'store'])->middleware(['identity.permission:assignment.create', 'idempotent']);
+        Route::post('/vehicle-driver-assignments/{assignment}/close', [AssignmentController::class, 'close'])->middleware(['identity.permission:assignment.close', 'idempotent']);
+        Route::get('/me/vehicle-assignments', [AssignmentController::class, 'mine'])->middleware('identity.permission:assignment.own.view');
+        Route::post('/me/vehicle-assignments/{assignment}/acknowledge', [AssignmentController::class, 'acknowledge'])->middleware(['identity.permission:assignment.own.acknowledge', 'idempotent']);
+
+        Route::get('/geography/dashboard', [GeographyController::class, 'dashboard'])->middleware('identity.permission:geography.dashboard.view');
+        Route::get('/geography/reference-data/place-categories', [GeographyController::class, 'categories'])->middleware('identity.permission:geography.reference.view');
+        Route::post('/geography/reference-data/place-categories', [GeographyController::class, 'storeCategory'])->middleware(['identity.permission:geography.reference.manage', 'idempotent']);
+        Route::get('/places/tree', [GeographyController::class, 'tree'])->middleware('identity.permission:place.view');
+        Route::get('/places', [GeographyController::class, 'places'])->middleware('identity.permission:place.view');
+        Route::post('/places', [GeographyController::class, 'storePlace'])->middleware(['identity.permission:place.manage', 'idempotent']);
+        Route::get('/places/{place}', [GeographyController::class, 'showPlace'])->middleware('identity.permission:place.view');
+        Route::patch('/places/{place}', [GeographyController::class, 'updatePlace'])->middleware(['identity.permission:place.manage', 'idempotent']);
+        Route::post('/places/{place}/status', [GeographyController::class, 'transitionPlace'])->middleware(['identity.permission:place.approve', 'idempotent']);
+        Route::post('/places/{place}/hierarchy', [GeographyController::class, 'attachParent'])->middleware(['identity.permission:place.hierarchy.manage', 'idempotent']);
+        Route::post('/places/{place}/location-policies', [GeographyController::class, 'createPolicy'])->middleware(['identity.permission:place.policy.manage', 'idempotent']);
+        Route::post('/location-policies/{policy}/approve', [GeographyController::class, 'approvePolicy'])->middleware(['identity.permission:place.policy.approve', 'idempotent']);
+        Route::get('/routes', [GeographyController::class, 'routes'])->middleware('identity.permission:route.view');
+        Route::post('/routes', [GeographyController::class, 'storeRoute'])->middleware(['identity.permission:route.manage', 'idempotent']);
+        Route::get('/routes/{route}', [GeographyController::class, 'showRoute'])->middleware('identity.permission:route.view');
+        Route::post('/routes/{route}/versions', [GeographyController::class, 'createRouteVersion'])->middleware(['identity.permission:route.manage', 'idempotent']);
+        Route::post('/route-versions/{version}/approve', [GeographyController::class, 'approveRouteVersion'])->middleware(['identity.permission:route.approve', 'idempotent']);
+        Route::get('/distance-references', [GeographyController::class, 'distanceReferences'])->middleware('identity.permission:distance.view');
+        Route::post('/distance-references', [GeographyController::class, 'storeDistanceReference'])->middleware(['identity.permission:distance.manage', 'idempotent']);
+        Route::get('/distance-references/{reference}', [GeographyController::class, 'showDistanceReference'])->middleware('identity.permission:distance.view');
+        Route::post('/distance-references/{reference}/approve', [GeographyController::class, 'approveDistanceReference'])->middleware(['identity.permission:distance.approve', 'idempotent']);
+        Route::get('/distance-matrix', [GeographyController::class, 'matrix'])->middleware('identity.permission:distance.view');
+        Route::get('/operational-zones', [GeographyController::class, 'operationalZones'])->middleware('identity.permission:geography.zone.view');
+        Route::post('/operational-zones', [GeographyController::class, 'storeOperationalZone'])->middleware(['identity.permission:geography.zone.manage', 'idempotent']);
+        Route::get('/distance-imports', [GeographyController::class, 'importBatches'])->middleware('identity.permission:geography.import.manage');
+        Route::post('/distance-imports', [GeographyController::class, 'stageImport'])->middleware(['identity.permission:geography.import.manage', 'idempotent']);
+        Route::post('/distance-imports/{import}/approve', [GeographyController::class, 'approveImport'])->middleware(['identity.permission:geography.import.approve', 'idempotent']);
+        Route::post('/distance-imports/{import}/rollback', [GeographyController::class, 'rollbackImport'])->middleware(['identity.permission:geography.import.approve', 'idempotent']);
+        Route::get('/me/operational-geography', [GeographyController::class, 'myOperationalReference'])->middleware('identity.permission:geography.own.view');
     });
 
     Route::middleware('throttle:api')->group(function (): void {
