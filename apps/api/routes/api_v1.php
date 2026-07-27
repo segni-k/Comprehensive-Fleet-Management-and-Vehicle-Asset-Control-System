@@ -218,4 +218,36 @@ Route::prefix('v1')->group(function (): void {
 
         Route::get('/organization-readiness', [OrganizationController::class, 'readiness'])->middleware('organization.permission:organization.hierarchy.view');
     });
+
+    // ── Milestone 7: Mobile Device Management (Admin) ──────────────────────
+    Route::middleware(['auth:sanctum', 'identity.session', 'throttle:api'])->group(function (): void {
+        Route::get('/mobile/dashboard', [AdminDeviceController::class, 'dashboard'])->middleware('identity.permission:mobile.device.view');
+        Route::get('/mobile/devices', [AdminDeviceController::class, 'index'])->middleware('identity.permission:mobile.device.view');
+        Route::get('/mobile/devices/{mobileDevice}', [AdminDeviceController::class, 'show'])->middleware('identity.permission:mobile.device.view');
+        Route::post('/mobile/enrollments', [AdminDeviceController::class, 'initiateEnrollment'])->middleware(['identity.permission:mobile.device.enroll', 'idempotent']);
+        Route::get('/mobile/enrollments/pending', [AdminDeviceController::class, 'pendingEnrollments'])->middleware('identity.permission:mobile.device.approve');
+        Route::post('/mobile/enrollments/{enrollmentRequest}/approve', [AdminDeviceController::class, 'approveEnrollment'])->middleware(['identity.permission:mobile.device.approve', 'idempotent']);
+        Route::post('/mobile/enrollments/{enrollmentRequest}/reject', [AdminDeviceController::class, 'rejectEnrollment'])->middleware(['identity.permission:mobile.device.reject', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/suspend', [AdminDeviceController::class, 'suspend'])->middleware(['identity.permission:mobile.device.suspend', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/reactivate', [AdminDeviceController::class, 'reactivate'])->middleware(['identity.permission:mobile.device.activate', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/revoke', [AdminDeviceController::class, 'revoke'])->middleware(['identity.permission:mobile.device.revoke', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/retire', [AdminDeviceController::class, 'retire'])->middleware(['identity.permission:mobile.device.retire', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/assign', [AdminDeviceController::class, 'assign'])->middleware(['identity.permission:mobile.device.assign', 'idempotent']);
+        Route::post('/mobile/assignments/{driverDeviceAssignment}/end', [AdminDeviceController::class, 'endAssignment'])->middleware(['identity.permission:mobile.device.assign', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/remote-actions', [AdminDeviceController::class, 'requestRemoteAction'])->middleware(['identity.permission:mobile.device.view', 'idempotent']);
+        Route::post('/mobile/devices/{mobileDevice}/trust', [AdminDeviceController::class, 'reevaluateTrust'])->middleware('identity.permission:mobile.device.view');
+        Route::get('/mobile/devices/{mobileDevice}/sync-status', [AdminDeviceController::class, 'syncStatus'])->middleware('identity.permission:mobile.sync.view');
+    });
+
+    // ── Milestone 7: Driver-facing device and sync endpoints (unauthenticated enrollment, then device-identity auth) ──
+    Route::middleware('throttle:60,1')->group(function (): void {
+        // These endpoints use device identity (stable_device_id + installation_id) rather than user session auth
+        Route::post('/driver/device/claim', [DriverDeviceController::class, 'claimChallenge']);
+        Route::get('/driver/device/status', [DriverDeviceController::class, 'deviceStatus']);
+        Route::post('/driver/device/metadata', [DriverDeviceController::class, 'registerMetadata']);
+        Route::get('/driver/device/policy', [DriverDeviceController::class, 'policy']);
+        Route::post('/driver/sync/init', [DriverDeviceController::class, 'initSync']);
+        Route::post('/driver/sync/commands', [DriverDeviceController::class, 'uploadCommands']);
+        Route::post('/driver/sync/actions/{actionId}/acknowledge', [DriverDeviceController::class, 'acknowledgeAction']);
+    });
 });

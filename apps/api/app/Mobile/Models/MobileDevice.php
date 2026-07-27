@@ -4,13 +4,23 @@ namespace App\Mobile\Models;
 
 use App\Fleet\Models\Driver;
 use App\Organization\Models\Organization;
+use Database\Factories\Mobile\MobileDeviceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class MobileDevice extends MobileModel
 {
+    use HasFactory;
+
     protected $table = 'mobile_devices';
+
+    protected static function newFactory(): MobileDeviceFactory
+    {
+        return MobileDeviceFactory::new();
+    }
+
 
     protected $casts = [
         'capability_metadata'      => 'array',

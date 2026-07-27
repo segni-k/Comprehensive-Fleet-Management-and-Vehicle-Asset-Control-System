@@ -82,7 +82,27 @@ final class IdentityPermissionSeeder extends Seeder
             ['geography.import.manage', 'geography', ['current_node', 'node_and_descendants'], false, true, true],
             ['geography.import.approve', 'geography', ['current_node', 'node_and_descendants', 'explicit_record'], false, true, true],
             ['geography.own.view', 'geography', ['current_node'], false, false, false],
+            // ── Milestone 7: Mobile device management ───────────────────────────
+            ['mobile.device.view', 'mobile', ['current_node', 'node_and_descendants'], false, false, false],
+            ['mobile.device.enroll', 'mobile', ['current_node', 'node_and_descendants'], false, true, false],
+            ['mobile.device.approve', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.reject', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.activate', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.suspend', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.revoke', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.replace', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.retire', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.assign', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.remote_sign_out', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.cache_reset', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.device.history.view', 'mobile', ['current_node', 'node_and_descendants'], false, false, false],
+            ['mobile.device.diagnostics.view', 'mobile', ['current_node', 'node_and_descendants'], false, false, false],
+            ['mobile.sync.view', 'mobile', ['current_node', 'node_and_descendants'], false, false, false],
+            ['mobile.sync.manage', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
+            ['mobile.policy.view', 'mobile', ['current_node', 'node_and_descendants'], false, false, false],
+            ['mobile.policy.manage', 'mobile', ['current_node', 'node_and_descendants'], false, true, true],
         ];
+
 
         foreach ($definitions as [$code, $domain, $scopeModes, $delegable, $requiresMfa, $makerChecker]) {
             DB::table('permissions')->insertOrIgnore([
