@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Documents\Contracts\MalwareScanner;
+use App\Documents\Infrastructure\DeferredMalwareScanner;
+use App\Outbox\Contracts\OutboxPublisher;
+use App\Outbox\Infrastructure\LogOutboxPublisher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobExceptionOccurred;
@@ -19,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(MalwareScanner::class, DeferredMalwareScanner::class);
+        $this->app->bind(OutboxPublisher::class, LogOutboxPublisher::class);
     }
 
     /**
