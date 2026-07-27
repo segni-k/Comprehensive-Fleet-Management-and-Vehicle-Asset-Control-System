@@ -38,6 +38,12 @@ function developmentAuthorizationHeaders(
     const bodyUlids = init.body.match(/[0-9A-HJKMNP-TV-Z]{26}/g) ?? [];
     bodyUlids.forEach((id) => ulids.add(id));
   }
+  if (init.body instanceof FormData) {
+    for (const value of init.body.values()) {
+      if (typeof value === "string" && /^[0-9A-HJKMNP-TV-Z]{26}$/.test(value))
+        ulids.add(value);
+    }
+  }
 
   return {
     "X-Actor-Reference": "milestone-2-admin-web",
@@ -63,6 +69,45 @@ function developmentAuthorizationHeaders(
       "organization.manager.manage",
       "organization.settings.view",
       "organization.settings.manage",
+      "fleet.reference.view",
+      "fleet.reference.manage",
+      "fleet.dashboard.view",
+      "vehicle.view",
+      "vehicle.create",
+      "vehicle.status.manage",
+      "vehicle.transfer",
+      "vehicle.odometer.record",
+      "vehicle.plate.manage",
+      "vehicle.fleet.assign",
+      "vehicle.compliance.manage",
+      "driver.view",
+      "driver.create",
+      "driver.status.manage",
+      "driver.licence.manage",
+      "assignment.view",
+      "assignment.create",
+      "assignment.close",
+      "geography.dashboard.view",
+      "geography.reference.view",
+      "geography.reference.manage",
+      "place.view",
+      "place.manage",
+      "place.approve",
+      "place.hierarchy.manage",
+      "place.policy.manage",
+      "place.policy.approve",
+      "route.view",
+      "route.manage",
+      "route.approve",
+      "distance.view",
+      "distance.manage",
+      "distance.approve",
+      "geography.zone.view",
+      "geography.zone.manage",
+      "geography.import.manage",
+      "geography.import.approve",
+      "document.view",
+      "document.upload",
     ].join(","),
     "X-Organization-Scope": [...ulids].join(","),
   };
