@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
+  Pressable,
   Text,
   TextInput,
   useWindowDimensions,
@@ -9,17 +10,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
 import { StatusBar } from "expo-status-bar";
-import { catalogues, translate, type Locale } from "@oromia/localization";
+import { Link } from "expo-router";
+import { catalogues, translate } from "@oromia/localization";
 import { AccessibleButton } from "../components/AccessibleButton";
 import {
   PlatformStateCard,
   type FoundationState,
 } from "../components/PlatformStateCard";
 import { mobileClassNames, resolveMobileLayoutDensity } from "../theme/tokens";
+import { useMobileLocale } from "../localization/MobileLocaleProvider";
 
 export default function App() {
   const { fontScale, width } = useWindowDimensions();
-  const [locale, setLocale] = useState<Locale>("en");
+  const { locale, setLocale } = useMobileLocale();
   const [online, setOnline] = useState(true);
   const [state, setState] = useState<FoundationState>("enrollment_required");
   const [authStage, setAuthStage] = useState<"credentials" | "mfa">(
@@ -182,6 +185,39 @@ export default function App() {
             label={t("support.title")}
             onPress={() => setState("support")}
           />
+          <Link href="/notifications" asChild>
+            <Pressable
+              accessibilityLabel={t("operations.notifications")}
+              accessibilityRole="button"
+              className="min-h-touch justify-center rounded-control border-2 border-brand bg-surface px-5 py-3 active:opacity-75 dark:border-border-dark dark:bg-surface-dark"
+            >
+              <Text className="text-center text-body font-semibold text-brand dark:text-content-dark">
+                {t("operations.notifications")}
+              </Text>
+            </Pressable>
+          </Link>
+          <Link href="/vehicle" asChild>
+            <Pressable
+              accessibilityLabel={t("mobileVehicle.title")}
+              accessibilityRole="button"
+              className="min-h-touch justify-center rounded-control border-2 border-brand bg-surface px-5 py-3 active:opacity-75 dark:border-border-dark dark:bg-surface-dark"
+            >
+              <Text className="text-center text-body font-semibold text-brand dark:text-content-dark">
+                {t("mobileVehicle.title")}
+              </Text>
+            </Pressable>
+          </Link>
+          <Link href="/geography" asChild>
+            <Pressable
+              accessibilityLabel={t("mobileGeography.open")}
+              accessibilityRole="button"
+              className="min-h-touch justify-center rounded-control border-2 border-brand bg-surface px-5 py-3 active:opacity-75 dark:border-border-dark dark:bg-surface-dark"
+            >
+              <Text className="text-center text-body font-semibold text-brand dark:text-content-dark">
+                {t("mobileGeography.open")}
+              </Text>
+            </Pressable>
+          </Link>
         </View>
       </ScrollView>
     </SafeAreaView>
