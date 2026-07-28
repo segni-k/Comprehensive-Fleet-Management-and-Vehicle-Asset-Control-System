@@ -223,8 +223,8 @@ return new class extends Migration
             $table->foreign('mobile_device_id')->references('id')->on('mobile_devices')->restrictOnDelete();
             $table->foreign('requested_by')->references('id')->on('users')->restrictOnDelete();
 
-            $table->index(['mobile_device_id', 'status', 'expires_at']);
-            $table->index(['status', 'expires_at']);
+            $table->index(['mobile_device_id', 'status', 'expires_at'], 'dra_device_status_expires_idx');
+            $table->index(['status', 'expires_at'], 'dra_status_expires_idx');
         });
 
         // ── Sync sessions ─────────────────────────────────────────────────────
@@ -296,8 +296,8 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->foreign('organization_id')->references('id')->on('organizations')->restrictOnDelete();
-            $table->unique(['organization_id', 'dataset_name', 'version_number']);
-            $table->index(['organization_id', 'dataset_name', 'published_at']);
+            $table->unique(['organization_id', 'dataset_name', 'version_number'], 'mdv_org_name_ver_unique');
+            $table->index(['organization_id', 'dataset_name', 'published_at'], 'mdv_org_name_pub_idx');
         });
 
         // ── Offline commands (server-side receipt tracking) ───────────────────
@@ -331,8 +331,8 @@ return new class extends Migration
             $table->foreign('mobile_device_id')->references('id')->on('mobile_devices')->restrictOnDelete();
             $table->foreign('organization_id')->references('id')->on('organizations')->restrictOnDelete();
 
-            $table->index(['mobile_device_id', 'status', 'received_at']);
-            $table->index(['status', 'next_retry_at']);
+            $table->index(['mobile_device_id', 'status', 'received_at'], 'moc_device_status_recv_idx');
+            $table->index(['status', 'next_retry_at'], 'moc_status_retry_idx');
         });
 
         // ── Device policy versions ────────────────────────────────────────────
@@ -363,7 +363,7 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
             $table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
 
-            $table->index(['organization_id', 'is_active', 'effective_from']);
+            $table->index(['organization_id', 'is_active', 'effective_from'], 'mdp_org_active_eff_idx');
         });
     }
 

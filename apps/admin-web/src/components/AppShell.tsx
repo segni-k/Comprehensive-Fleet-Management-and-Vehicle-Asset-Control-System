@@ -28,7 +28,9 @@ export function AppShell({
           <Link href={"/geography" as Route}>
             {translate(locale, "nav.geography")}
           </Link>
-          <Link href={"/devices" as Route}>
+          <Link href={"/trips" as Route}>{translate(locale, "nav.trips")}</Link>
+          <Link href={"/fuel" as Route}>{translate(locale, "nav.fuel")}</Link>
+          <Link href={`/${locale}/devices` as Route}>
             {translate(locale, "nav.devices")}
           </Link>
           <Link href="/identity">{translate(locale, "nav.identity")}</Link>
